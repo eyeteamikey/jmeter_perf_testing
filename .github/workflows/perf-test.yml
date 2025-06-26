@@ -48,6 +48,15 @@ jobs:
           cd repo
           python run_test.py --test-type spike_nometrics --env config/env_config.yml --skip-monitoring
 
+      - name: Upload JMeter Results as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-results
+          path: |
+            reports/**/run_*/results.jtl
+            reports/**/run_*/grafana_dashboard.png
+            reports/**/run_*/index.html
+
       # - name: Stop Docker Services
       #   if: always()
       #   run: |
