@@ -46,7 +46,7 @@ jobs:
       - name: Run JMeter Test
         run: |
           cd repo
-          python run_test.py --test-type spike_nometrics --env config/env_config.yml
+          python run_test.py --test-type spike_nometrics --env config/env_config.yml --skip-monitoring
 
       # - name: Stop Docker Services
       #   if: always()
