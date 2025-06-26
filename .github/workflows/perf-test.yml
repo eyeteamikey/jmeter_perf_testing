@@ -29,7 +29,7 @@ jobs:
       - name: Start Docker Services (Grafana & InfluxDB)
         run: |
           cd repo
-          docker-compose up -d
+          docker compose up -d
           sleep 15  # Wait for Grafana/Influx to be ready
 
       - name: Download and Extract JMeter
