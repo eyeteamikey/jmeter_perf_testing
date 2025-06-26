@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# JMeter reports
+/reports/*
+!/reports/.gitkeep  # Keep the folder structure
+
+# Docker volumes/data
+monitoring/influxdb/data/
+monitoring/influxdb/data/data/_internal/
+monitoring/influxdb/data/data/monitor/
+monitoring/influxdb/init/
+grafana/data/
+grafana/plugins/
+
+# Grafana state
+provisioning/dashboards/*.json
+!provisioning/dashboards/default_dashboard.json  # if you need to keep one
+/etc/grafana/provisioning/
+
+# VS Code and system
+.vscode/
+.DS_Store
+*.swp
+
+# Environment
+.env

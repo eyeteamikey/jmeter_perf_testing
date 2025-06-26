@@ -1,40 +1,61 @@
 import argparse
 import subprocess
 import os
-import yaml
+import datetime
 from utils.file_utils import clean_directory
+from utils.config_loader import ConfigLoader
 
-# Load YAML config files
-def load_yaml(path):
-    with open(path, 'r') as f:
-        return yaml.safe_load(f)
 
-paths = load_yaml('config/paths.yml')
-settings = load_yaml('config/env_config.yml')
+# Parse CLI arguments
+parser = argparse.ArgumentParser(description="Run a JMeter test.")
+parser.add_argument("--test-type", required=True, help="Test type (e.g., stress, load, spike)")
+parser.add_argument("--env", default="config/env_config.yml", help="Path to environment config YAML")
+parser.add_argument("--skip-monitoring", action="store_true", help="Disable InfluxDB/Grafana metrics")
+args = parser.parse_args()
+
+# Initialize ConfigLoader with the selected environment config
+config = ConfigLoader(env=args.env)
+paths = config.paths
+settings = config.env_config
+
 
 def run_test(test_type):
     print("Loaded test scripts:", paths["scripts"].keys())
     print("Loaded test reports:", paths["reports"].keys())
+
     if test_type not in paths["scripts"] or test_type not in paths["reports"]:
         print(f"Invalid test type: {test_type}")
         return
 
     jmx_path = paths["scripts"][test_type]
-    report_dir = paths["reports"][test_type]
+
+    # Timestamped report directory
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_dir = os.path.join(paths["reports"][test_type], f"run_{timestamp}")
+    os.makedirs(report_dir, exist_ok=True)
     jtl_file = os.path.join(report_dir, "results.jtl")
 
-    # Clean the report directory before running
+    # Clean directory
     clean_directory(report_dir)
 
-    # Construct the JMeter command
+    # Construct JMeter command
     cmd = [
         settings["jmeter_path"],
         "-n",
         "-t", jmx_path,
         "-l", jtl_file,
         "-e",
-        "-o", report_dir
+        "-o", report_dir,
+        f"-Jthreads={settings['threads']}",
+        f"-Jramp_up={settings['ramp_up']}",
+        f"-Jloops={settings['loops']}",
+        f"-Jbase_url={settings['base_url']}"
     ]
+
+    if args.skip_monitoring:
+        print("Skipping backend listener integration.")
+    else:
+        print("Backend listener will be active.")
 
     print(f"Running test: {test_type}")
     print("Command:", " ".join(cmd))
@@ -45,13 +66,6 @@ def run_test(test_type):
     except subprocess.CalledProcessError as e:
         print(f"Test '{test_type}' failed with exit code {e.returncode}.")
     except FileNotFoundError:
-        print("JMeter not found. Please check the path in config/settings.")
+        print("JMeter not found. Please check the path in config settings.")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run a JMeter test by type.")
-    parser.add_argument("type", help="Test type (e.g. stress, volume, load, spike, endurance, scalability)")
-    args = parser.parse_args()
-
-    run_test(args.type)
-# This script runs a JMeter test based on the provided type.
-# It cleans the report directory before running the test and constructs the JMeter command accordingly.
+run_test(args.test_type)

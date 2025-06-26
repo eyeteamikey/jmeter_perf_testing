@@ -1,0 +1,39 @@
+name: JMeter Performance Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  jmeter-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:20.10.16
+        options: --privileged
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Start Docker containers
+        run: |
+          docker-compose up -d
+          sleep 20  # wait for Grafana/Influx to be ready
+
+      - name: Run JMeter performance test
+        run: |
+          python run_test.py --test-type stress --env config/env_config.yml
+
+      - name: Teardown
+        run: |
+          docker-compose down
