@@ -19,12 +19,16 @@ config = ConfigLoader(env=args.env)
 paths = config.paths
 settings = config.env_config
 
-# Automatically detect correct JMeter path
-default_jmeter_path = (
-    "/opt/apache-jmeter-5.6.3/bin/jmeter" if platform.system() != "Windows"
-    else "C:/Users/Michael/Downloads/apache-jmeter-5.6.3/apache-jmeter-5.6.3/bin/jmeter.bat"
-)
+# Automatically determine correct JMeter path
+if os.environ.get("GITHUB_ACTIONS") == "true":
+    default_jmeter_path = "/opt/apache-jmeter-5.6.3/bin/jmeter"
+elif platform.system() == "Windows":
+    default_jmeter_path = "C:/Users/Michael/Downloads/apache-jmeter-5.6.3/apache-jmeter-5.6.3/bin/jmeter.bat"
+else:
+    default_jmeter_path = "/usr/local/bin/jmeter"
+
 settings["jmeter_path"] = settings.get("jmeter_path") or default_jmeter_path
+
 
 
 def run_test(test_type):
