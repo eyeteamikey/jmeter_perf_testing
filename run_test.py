@@ -2,7 +2,6 @@ import argparse
 import subprocess
 import os
 import datetime
-import platform
 from utils.file_utils import clean_directory
 from utils.config_loader import ConfigLoader
 from utils.grafana_screenshot import capture_grafana_dashboard
@@ -14,38 +13,37 @@ parser.add_argument("--env", default="config/env_config.yml", help="Path to envi
 parser.add_argument("--skip-monitoring", action="store_true", help="Disable InfluxDB/Grafana metrics")
 args = parser.parse_args()
 
-# Load config
+# Load configuration
 config = ConfigLoader(env=args.env)
 paths = config.paths
 settings = config.env_config
-
-# Determine JMeter path based on environment
-settings["jmeter_path"] = (
-    os.environ.get("JMETER_PATH")  # Prefer CI-defined path
-    or settings.get("jmeter_path")  # Fall back to YAML config
-    or (
-        "C:/Users/Michael/Downloads/apache-jmeter-5.6.3/apache-jmeter-5.6.3/bin/jmeter.bat"
-        if platform.system() == "Windows"
-        else "/usr/local/bin/jmeter"
-    )
-)
 
 def run_test(test_type):
     print("Loaded test scripts:", paths["scripts"].keys())
     print("Loaded test reports:", paths["reports"].keys())
 
     if test_type not in paths["scripts"] or test_type not in paths["reports"]:
-        print(f"Invalid test type: {test_type}")
+        print(f"❌ Invalid test type: {test_type}")
         return
 
-    jmx_path = paths["scripts"][test_type]
+    # Pick appropriate JMX file
+    base_jmx_path = paths["scripts"][test_type]
+    if args.skip_monitoring:
+        nometrics_jmx = base_jmx_path.replace(".jmx", "_nometrics.jmx")
+        jmx_path = nometrics_jmx if os.path.exists(nometrics_jmx) else base_jmx_path
+    else:
+        jmx_path = base_jmx_path
+
+    # Timestamped report folder
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_dir = os.path.join(paths["reports"][test_type], f"run_{timestamp}")
     os.makedirs(report_dir, exist_ok=True)
     jtl_file = os.path.join(report_dir, "results.jtl")
 
+    # Clean previous data
     clean_directory(report_dir)
 
+    # Construct JMeter CLI command
     cmd = [
         settings["jmeter_path"],
         "-n",
@@ -59,32 +57,32 @@ def run_test(test_type):
         f"-Jbase_url={settings['base_url']}"
     ]
 
-    if args.skip_monitoring:
-        print("Skipping backend listener integration.")
-    else:
-        print("Backend listener will be active.")
-
-    print(f"Running test: {test_type}")
-    print("Command:", " ".join(cmd))
+    print(f"\n▶ Running test: {test_type}")
+    print("📄 JMX path:", jmx_path)
+    print("📁 Report output:", report_dir)
+    print("🔧 Command:", " ".join(cmd))
 
     try:
         subprocess.run(cmd, check=True)
         print(f"✅ Test '{test_type}' completed successfully.")
-
-        # Screenshot only if monitoring is active
-        if not args.skip_monitoring and "grafana" in settings:
-            grafana = settings["grafana"]
-            capture_grafana_dashboard(
-                url=grafana["url"],
-                output_path=os.path.join(report_dir, "grafana_dashboard.png"),
-                username=grafana.get("admin_user", "admin"),
-                password=grafana.get("admin_password", "admin"),
-                dashboard_uid=grafana["dashboard_uid"]
-            )
-
     except subprocess.CalledProcessError as e:
         print(f"❌ Test '{test_type}' failed with exit code {e.returncode}.")
+        return
     except FileNotFoundError:
-        print("🚫 JMeter not found. Please check the path in config settings.")
+        print("❌ JMeter not found. Please check your path in config.")
 
-run_test(args.test_type)
+    # Only capture screenshot if monitoring is enabled
+    if not args.skip_monitoring:
+        grafana = settings.get("grafana", {})
+        capture_grafana_dashboard(
+            url=grafana.get("url"),
+            dashboard_uid=grafana.get("dashboard_uid"),
+            username=grafana.get("admin_user"),
+            password=grafana.get("admin_password"),
+            output_path=os.path.join(report_dir, "grafana_dashboard.png")
+        )
+    else:
+        print("⚠️ Monitoring disabled. Skipping Grafana screenshot.")
+
+if __name__ == "__main__":
+    run_test(args.test_type)
