@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import os
 import datetime
+import platform
 from utils.file_utils import clean_directory
 from utils.config_loader import ConfigLoader
 from utils.grafana_screenshot import capture_grafana_dashboard
@@ -11,13 +12,20 @@ parser = argparse.ArgumentParser(description="Run a JMeter test.")
 parser.add_argument("--test-type", required=True, help="Test type (e.g., stress, load, spike)")
 parser.add_argument("--env", default="config/env_config.yml", help="Path to environment config YAML")
 parser.add_argument("--skip-monitoring", action="store_true", help="Disable InfluxDB/Grafana metrics")
-parser.add_argument("--screenshot", action="store_true", help="Capture Grafana dashboard screenshot after test")
 args = parser.parse_args()
 
-# Initialize ConfigLoader with the selected environment config
+# Load config
 config = ConfigLoader(env=args.env)
 paths = config.paths
 settings = config.env_config
+
+# Automatically detect correct JMeter path
+default_jmeter_path = (
+    "/opt/apache-jmeter-5.6.3/bin/jmeter" if platform.system() != "Windows"
+    else "C:/Users/Michael/Downloads/apache-jmeter-5.6.3/apache-jmeter-5.6.3/bin/jmeter.bat"
+)
+settings["jmeter_path"] = settings.get("jmeter_path") or default_jmeter_path
+
 
 def run_test(test_type):
     print("Loaded test scripts:", paths["scripts"].keys())
@@ -28,17 +36,13 @@ def run_test(test_type):
         return
 
     jmx_path = paths["scripts"][test_type]
-
-    # Timestamped report directory
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_dir = os.path.join(paths["reports"][test_type], f"run_{timestamp}")
     os.makedirs(report_dir, exist_ok=True)
     jtl_file = os.path.join(report_dir, "results.jtl")
 
-    # Clean directory
     clean_directory(report_dir)
 
-    # Construct JMeter command
     cmd = [
         settings["jmeter_path"],
         "-n",
@@ -62,23 +66,22 @@ def run_test(test_type):
 
     try:
         subprocess.run(cmd, check=True)
-        print(f"Test '{test_type}' completed successfully.")
+        print(f"✅ Test '{test_type}' completed successfully.")
 
-        if not args.skip_monitoring:
-            grafana = settings.get("grafana", {})
+        # Screenshot only if monitoring is active
+        if not args.skip_monitoring and "grafana" in settings:
+            grafana = settings["grafana"]
             capture_grafana_dashboard(
-                url=grafana.get("url"),
+                url=grafana["url"],
                 output_path=os.path.join(report_dir, "grafana_dashboard.png"),
-                dashboard_uid=grafana.get("dashboard_uid"),
-                username=grafana.get("admin_user"),
-                password=grafana.get("admin_password"),
+                username=grafana.get("admin_user", "admin"),
+                password=grafana.get("admin_password", "admin"),
+                dashboard_uid=grafana["dashboard_uid"]
             )
 
-
-
     except subprocess.CalledProcessError as e:
-        print(f"Test '{test_type}' failed with exit code {e.returncode}.")
+        print(f"❌ Test '{test_type}' failed with exit code {e.returncode}.")
     except FileNotFoundError:
-        print("JMeter not found. Please check the path in config settings.")
+        print("🚫 JMeter not found. Please check the path in config settings.")
 
 run_test(args.test_type)
