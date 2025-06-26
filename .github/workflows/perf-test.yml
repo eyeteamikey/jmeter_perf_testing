@@ -1,60 +1,51 @@
-name: Run JMeter Basic Stress Test
+name: JMeter Performance Test
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+  pull_request:
+    branches: [main]
 
 jobs:
   jmeter-test:
     runs-on: ubuntu-latest
 
-    services:
-      influxdb:
-        image: influxdb:1.8
-        ports:
-          - 8086:8086
-        env:
-          INFLUXDB_DB: jmeter
-          INFLUXDB_ADMIN_USER: admin
-          INFLUXDB_ADMIN_PASSWORD: admin123
-          INFLUXDB_HTTP_AUTH_ENABLED: "true"
-        options: >-
-          --health-cmd "curl -f http://localhost:8086/ping || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      grafana:
-        image: grafana/grafana
-        ports:
-          - 3000:3000
-        env:
-          GF_SECURITY_ADMIN_USER: admin
-          GF_SECURITY_ADMIN_PASSWORD: admin
-        volumes:
-          - ./provisioning:/etc/grafana/provisioning
-          - ./grafana/dashboards:/var/lib/grafana/dashboards
-
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          path: repo
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: Install Dependencies
+      - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
+          cd repo
           pip install -r requirements.txt
+
+      - name: Start Docker Services (Grafana & InfluxDB)
+        run: |
+          cd repo
+          docker-compose up -d
+          sleep 15  # Wait for Grafana/Influx to be ready
 
       - name: Download and Extract JMeter
         run: |
-          wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
-          tar -xzf apache-jmeter-5.6.3.tgz
+          cd repo
+          mkdir -p tools
+          curl -L https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz | tar zx -C tools
+          echo "JMETER_PATH=$PWD/tools/apache-jmeter-5.6.3/bin/jmeter" >> $GITHUB_ENV
 
       - name: Run JMeter Test
         run: |
-          python run_test.py --test-type stress --env config/env_config.yml --skip-monitoring
+          cd repo
+          python run_test.py --test-type stress --env config/env_config.yml
+
+      - name: Stop Docker Services
+        if: always()
+        run: |
+          cd repo
+          docker-compose down --volumes
