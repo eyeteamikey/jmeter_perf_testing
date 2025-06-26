@@ -53,9 +53,9 @@ jobs:
         with:
           name: jmeter-results
           path: |
-            reports/**/run_*/results.jtl
-            reports/**/run_*/grafana_dashboard.png
-            reports/**/run_*/index.html
+            reports/**/*.jtl
+            reports/**/*.png
+            reports/**/index.html
 
       # - name: Stop Docker Services
       #   if: always()
