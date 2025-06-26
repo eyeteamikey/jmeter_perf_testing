@@ -87,7 +87,7 @@ if (dir.exists()) {
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
               <stringProp name="49587">201</stringProp>
@@ -98,7 +98,7 @@ if (dir.exists()) {
             <intProp name="Assertion.test_type">48</intProp>
           </ResponseAssertion>
           <hashTree/>
-          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Response ID">
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Response ID" enabled="true">
             <stringProp name="JSONPostProcessor.referenceNames">response_id</stringProp>
             <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
             <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
@@ -106,7 +106,7 @@ if (dir.exists()) {
             <stringProp name="Scope.variable">response_id</stringProp>
           </JSONPostProcessor>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="1099552214">&quot;id&quot;:${id}</stringProp>
             </collectionProp>
@@ -118,7 +118,7 @@ if (dir.exists()) {
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -155,7 +155,7 @@ if (dir.exists()) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Delete Report Folder Contents">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Delete Report Folder Contents" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -173,7 +173,7 @@ if (dir.exists() &amp;&amp; dir.isDirectory()) {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
           <stringProp name="filename">C:/Users/Michael/OneDrive/Documents/Python/jmeter_perf_testing/data/cover_photos.csv</stringProp>
           <stringProp name="fileEncoding"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -222,7 +222,7 @@ if (dir.exists() &amp;&amp; dir.isDirectory()) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>

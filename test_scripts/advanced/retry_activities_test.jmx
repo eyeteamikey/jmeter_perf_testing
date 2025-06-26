@@ -50,7 +50,7 @@ if (vars.get(&quot;retryCount&quot;) == null) {
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Initialize Counter" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Initialize Counter">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -68,7 +68,7 @@ if (retryCount == 0) {
 </stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Retry Controller" enabled="true">
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Retry Controller">
           <stringProp name="LoopController.loops">3</stringProp>
         </LoopController>
         <hashTree>
@@ -167,7 +167,7 @@ if ((status &gt;= 500 &amp;&amp; status &lt; 600) &amp;&amp; retryCount &lt; 3) 
           <stringProp name="ConstantTimer.delay">1000</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -294,7 +294,7 @@ if ((status &gt;= 500 &amp;&amp; status &lt; 600) &amp;&amp; retryCount &lt; 3) 
           <stringProp name="classname">org.apache.jmeter.visualizers.backend.influxdb.InfluxdbBackendListenerClient</stringProp>
         </BackendListener>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Retry Activities CSV" enabled="true">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Retry Activities CSV">
           <stringProp name="filename">C:/Users/Michael/OneDrive/Documents/Python/jmeter_perf_testing/data/activities_retry_test.csv</stringProp>
           <stringProp name="fileEncoding"></stringProp>
           <stringProp name="variableNames">id,title,dueDate,completed</stringProp>
