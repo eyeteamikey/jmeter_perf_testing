@@ -48,4 +48,4 @@ jobs:
         if: always()
         run: |
           cd repo
-          docker-compose down --volumes
+          docker compose down --volumes
