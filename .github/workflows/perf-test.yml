@@ -30,11 +30,11 @@ jobs:
         run: |
           npx playwright install --with-deps
 
-      - name: Start Docker Services (Grafana & InfluxDB)
-        run: |
-          cd repo
-          docker compose up -d
-          sleep 15  # Wait for Grafana/Influx to be ready
+      # - name: Start Docker Services (Grafana & InfluxDB)
+      #   run: |
+      #     cd repo
+      #     docker compose up -d
+      #     sleep 15  # Wait for Grafana/Influx to be ready
 
       - name: Download and Extract JMeter
         run: |
@@ -48,8 +48,8 @@ jobs:
           cd repo
           python run_test.py --test-type spike --env config/env_config.yml
 
-      - name: Stop Docker Services
-        if: always()
-        run: |
-          cd repo
-          docker compose down --volumes
+      # - name: Stop Docker Services
+      #   if: always()
+      #   run: |
+      #     cd repo
+      #     docker compose down --volumes
