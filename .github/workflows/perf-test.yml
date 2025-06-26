@@ -1,19 +1,43 @@
-name: JMeter Performance Test
+name: Run JMeter Basic Stress Test
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  jmeter-tests:
+  jmeter-test:
     runs-on: ubuntu-latest
 
     services:
-      docker:
-        image: docker:20.10.16
-        options: --privileged
+      influxdb:
+        image: influxdb:1.8
+        ports:
+          - 8086:8086
+        env:
+          INFLUXDB_DB: jmeter
+          INFLUXDB_ADMIN_USER: admin
+          INFLUXDB_ADMIN_PASSWORD: admin123
+          INFLUXDB_HTTP_AUTH_ENABLED: "true"
+        options: >-
+          --health-cmd "curl -f http://localhost:8086/ping || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      grafana:
+        image: grafana/grafana
+        ports:
+          - 3000:3000
+        env:
+          GF_SECURITY_ADMIN_USER: admin
+          GF_SECURITY_ADMIN_PASSWORD: admin
+        volumes:
+          - ./provisioning:/etc/grafana/provisioning
+          - ./grafana/dashboards:/var/lib/grafana/dashboards
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -21,19 +45,16 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start Docker containers
+      - name: Download and Extract JMeter
         run: |
-          docker-compose up -d
-          sleep 20  # wait for Grafana/Influx to be ready
+          wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xzf apache-jmeter-5.6.3.tgz
 
-      - name: Run JMeter performance test
+      - name: Run JMeter Test
         run: |
-          python run_test.py --test-type stress --env config/env_config.yml
-
-      - name: Teardown
-        run: |
-          docker-compose down
+          python run_test.py --test-type stress --env config/env_config.yml --skip-monitoring

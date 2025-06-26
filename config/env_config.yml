@@ -3,3 +3,9 @@ jmeter_path: "C:/Users/Michael/Downloads/apache-jmeter-5.6.3/apache-jmeter-5.6.3
 threads: 50
 ramp_up: 30
 loops: 10
+
+grafana:
+  url: "http://localhost:3000"
+  dashboard_uid: "9db51469-47a7-4ef2-a96b-4d76bb895e2d"
+  admin_user: "admin"
+  admin_password: "admin"

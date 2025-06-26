@@ -4,20 +4,20 @@ import os
 import datetime
 from utils.file_utils import clean_directory
 from utils.config_loader import ConfigLoader
-
+from utils.grafana_screenshot import capture_grafana_dashboard
 
 # Parse CLI arguments
 parser = argparse.ArgumentParser(description="Run a JMeter test.")
 parser.add_argument("--test-type", required=True, help="Test type (e.g., stress, load, spike)")
 parser.add_argument("--env", default="config/env_config.yml", help="Path to environment config YAML")
 parser.add_argument("--skip-monitoring", action="store_true", help="Disable InfluxDB/Grafana metrics")
+parser.add_argument("--screenshot", action="store_true", help="Capture Grafana dashboard screenshot after test")
 args = parser.parse_args()
 
 # Initialize ConfigLoader with the selected environment config
 config = ConfigLoader(env=args.env)
 paths = config.paths
 settings = config.env_config
-
 
 def run_test(test_type):
     print("Loaded test scripts:", paths["scripts"].keys())
@@ -63,6 +63,19 @@ def run_test(test_type):
     try:
         subprocess.run(cmd, check=True)
         print(f"Test '{test_type}' completed successfully.")
+
+        if not args.skip_monitoring:
+            grafana = settings.get("grafana", {})
+            capture_grafana_dashboard(
+                url=grafana.get("url"),
+                output_path=os.path.join(report_dir, "grafana_dashboard.png"),
+                dashboard_uid=grafana.get("dashboard_uid"),
+                username=grafana.get("admin_user"),
+                password=grafana.get("admin_password"),
+            )
+
+
+
     except subprocess.CalledProcessError as e:
         print(f"Test '{test_type}' failed with exit code {e.returncode}.")
     except FileNotFoundError:
