@@ -1,0 +1,2 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1750893444861,1357,HTTP Request,200,OK,Retry Test Group 1-1,text,true,,280,307,1,1,https://fakerestapi.azurewebsites.net/api/v1/Activities,1354,0,1109

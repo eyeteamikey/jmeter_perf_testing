@@ -1,0 +1,19 @@
+scripts:
+  stress: "test_scripts/stress/basic_stress_test.jmx"
+  load: "test_scripts/load/basic_load_test.jmx"
+  endurance: "test_scripts/endurance/basic_endurance_test.jmx"
+  scalability: "test_scripts/scalability/basic_scalability_test.jmx"
+  spike: "test_scripts/spike/basic_spike_test.jmx"
+  volume: "test_scripts/volume/basic_volume_test.jmx"
+  retry_activities: "test_scripts/advanced/retry_activities_test.jmx"
+  timeout_retry: "test_scripts/advanced/timeout_retry_test.jmx"
+
+reports:
+  stress: "reports/stress"
+  load: "reports/load"
+  endurance: "reports/endurance"
+  scalability: "reports/scalability"
+  spike: "reports/spike"
+  volume: "reports/volume"
+  retry_activities: "reports/advanced/retry_activities"
+  timeout_retry: "reports/advanced/timeout_retry"

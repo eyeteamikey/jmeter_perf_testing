@@ -1,0 +1,7 @@
+headers:
+  - name: "Content-Type"
+    value: "application/json"
+
+csv_data_file: "data/cover_photos.csv"
+assertions:
+  status_code: [200, 201]
